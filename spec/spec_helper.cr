@@ -1,2 +1,2 @@
 require "spec"
-require "../src/csv_orm"
+require "../src/objectify"

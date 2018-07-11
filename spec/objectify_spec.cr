@@ -1,6 +1,6 @@
 require "./spec_helper"
 
-describe CsvOrm do
+describe Objectify do
   # TODO: Write tests
 
   it "works" do
