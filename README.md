@@ -3,7 +3,6 @@
 Crystal library to be used with the db lib.  
 Allows SQL result sets to be transformed into an object or array of object  
 Also allows SQL scripts to be injected with the correct variables from the passed object  
-  Currently requires the object to be setup with JSON.mapping
 
 ## Installation
 
@@ -50,7 +49,7 @@ require "db"
 require "mysql"
 require "objectify"
 
-# Your class that is to be built from SQL (requires JSON Mapping)
+# Your class that is to be built from SQL
 class Note
   property note_id : String?
   property content : String?
@@ -92,7 +91,6 @@ db.exec query, args
 ```
 ## Todo
 Better error handling  
-Possible alternative to needing JSON.mapping
 
 ## Contributors
 
