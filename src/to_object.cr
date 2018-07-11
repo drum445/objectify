@@ -21,66 +21,24 @@ module Objectify
   end
 
   private def self.transform_one(rs, object_type)
+    object = object_type.new
     col_names = rs.column_names
 
-    # build a JSON string using our columns and fields
-    string = JSON.build do |json|
-      json.object do
-        col_names.each do |col|
-          json_encode_field json, col, rs.read
-        end
-      end
+    col_names.each_with_index do |col, idx|
+      self.set(object, col, rs.read)
     end
 
-    # create an object using the JSON created above
-    object = object_type.from_json(string)
-    # return object
     return object
   end
 
-  private def self.json_encode_field(json, col, value)
-    case value
-    when Bytes
-      # custom json encoding. Avoid extra allocations.
-      json.field col do
-        json.array do
-          value.each do |e|
-            json.scalar e
-          end
+  private def self.set(obj : T, attr, val) forall T
+    {% for ivar in T.instance_vars %}
+      if {{ivar.stringify}} == attr
+        # check that the var is correct type for field
+        if val.is_a?({{ivar.type}})
+          obj.{{ivar.id}} = val
         end
       end
-    when Time::Span
-      # Time Span isn't supported
-    else
-      # encode the value as their built in json format.
-      json.field col do
-        value.to_json(json)
-      end
-    end
+    {% end %}
   end
-end
-
-require "db"
-require "mysql"
-
-
-# Your class that is to be built from SQL (requires JSON Mapping)
-class Note
-    JSON.mapping(
-        note_id: String,
-        content: String,
-        likes: Int64,
-        updated: Time,
-        optional: Int64?
-      )
-end
-
-db = DB.open "mysql://root:password@localhost:3306/todo_list"
-
-db.query "SELECT '123' as note_id, 'hello' as content, 4 as likes, NOW() as updated, NULL as optional FROM DUAL
-          UNION ALL
-          SELECT '444', 'asd', 66, NOW(), 0 FROM DUAL;" do |rs|
-    notes = Objectify.to_objects(rs, Note)
-
-    puts notes # => Array of Note
 end

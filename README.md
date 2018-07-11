@@ -27,14 +27,12 @@ require "db"
 require "mysql"
 require "objectify"
 
-# Your class that is to be built from SQL (requires JSON Mapping)
+# Your class that is to be built from SQL (setters aren't required)
 class Note
-    JSON.mapping(
-        note_id: String,
-        content: String,
-        likes: Int64,
-        updated: Time
-      )
+  property note_id : String?
+  property content : String?
+  property likes : Int64?
+  property updated : Time?
 end
 
 db = DB.open "mysql://root:password@localhost:3306/test"
@@ -54,13 +52,10 @@ require "objectify"
 
 # Your class that is to be built from SQL (requires JSON Mapping)
 class Note
-    JSON.mapping(
-        note_id: String,
-        content: String,
-        likes: Int64,
-        updated: Time,
-        optional: Int64?
-      )
+  property note_id : String?
+  property content : String?
+  property likes : Int64?
+  property updated : Time?
 end
 
 db = DB.open "mysql://root:password@localhost:3306/test"
@@ -83,10 +78,8 @@ require "objectify"
 db = DB.open "mysql://root:password@localhost:3306/test"
 
 class Person
-  JSON.mapping(
-    id: String,
-    username: String
-  )
+  property id : String
+  property username : String
 
   def initialize(@id, @username)
   end

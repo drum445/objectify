@@ -5,12 +5,11 @@ require "db"
 module Objectify
   def self.to_sql(script : String, object)
     fields = self.get_fields(script)
-    json_doc = JSON.parse(object.to_json)
 
     # create the args
     args = [] of DB::Any
     fields.each do |field|
-      args.push(json_doc[field].to_s)
+      args.push(self.send(object, field))
     end
 
     # prepare the script for db
@@ -19,6 +18,14 @@ module Objectify
     end
 
     return script, args
+  end
+
+  private def self.send(obj : T, attr) forall T
+    {% for ivar in T.instance_vars %}
+      if {{ivar.stringify}} == attr
+        return obj.@{{ivar.id}}
+      end
+    {% end %}
   end
 
   private def self.get_fields(script : String)
