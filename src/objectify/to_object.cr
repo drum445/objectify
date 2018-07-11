@@ -1,6 +1,3 @@
-require "./objectify/*"
-require "json"
-
 module Objectify
   # T.class so we can get type variable of the object and create an array
   def self.to_object(rs, object_type)

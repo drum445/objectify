@@ -1,5 +1,3 @@
-require "./objectify/*"
-require "json"
 require "db"
 
 module Objectify
