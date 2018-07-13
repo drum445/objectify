@@ -18,6 +18,11 @@ dependencies:
 
 ```crystal
 require "objectify"
+
+# include objectify in your class
+class foo
+  include Objectify
+end
 ```
 
 ##### Result set to object
@@ -26,12 +31,15 @@ require "db"
 require "mysql"
 require "objectify"
 
-# Your class that is to be built from SQL (setters aren't required)
+# Your class that is to be built from SQL, will raise exception if:
+# A non-nillable field is not in the result set 
+# Or a field being returned from mysql is the wrong type
 class Note
-  property note_id : String?
-  property content : String?
-  property likes : Int64?
-  property updated : Time?
+  include Objectify
+  property note_id : String
+  property content : String
+  property likes : Int64
+  property updated : Time
 end
 
 db = DB.open "mysql://root:password@localhost:3306/test"
@@ -51,21 +59,23 @@ require "objectify"
 
 # Your class that is to be built from SQL
 class Note
-  property note_id : String?
-  property content : String?
-  property likes : Int64?
-  property updated : Time?
+  include Objectify
+  property note_id : String
+  property content : String
+  property likes : Int64
+  property updated : Time? # nillable as it is not in the result set
 end
 
 db = DB.open "mysql://root:password@localhost:3306/test"
 
-db.query "SELECT '123' as note_id, 'hello' as content, 4 as likes, NOW() as updated, NULL as optional FROM DUAL
+db.query "SELECT '123' as note_id, 'hello' as content, 4 as likes FROM DUAL
           UNION ALL
-          SELECT '444', 'asd', 66, NOW(), 0 FROM DUAL;" do |rs|
+          SELECT '444', 'asd', 66 FROM DUAL;" do |rs|
     notes = Objectify.to_objects(rs, Note)
 
     puts notes # => Array of Note
 end
+
 ```
 
 #### Inserting object into DB
