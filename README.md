@@ -20,7 +20,7 @@ dependencies:
 require "objectify"
 
 # include objectify in your class
-class foo
+class Foo
   include Objectify
 end
 ```
