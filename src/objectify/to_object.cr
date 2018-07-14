@@ -27,49 +27,58 @@ module Objectify
 
   # transform each row to object
   private def self.transform_one(rs, object_type)
-    object = object_type.new
     col_names = rs.column_names
-    req_fields = get_required(object)
 
-    # after we have our colum names and required fields, make sure the required fields
-    # are present in the result set, if it isn't this will cause memory issues later
-    req_fields.each do |field|
-      if !col_names.includes?(field)
-        raise Exception.new("Result set is missing required field '#{field}'")
+    # build a JSON string using our columns and fields
+    string = JSON.build do |json|
+      json.object do
+        col_names.each do |col|
+          json_encode_field json, col, rs.read
+        end
       end
     end
 
-    col_names.each do |col|
-      self.set(object, col, rs.read)
+    # create an object using the JSON created above
+    begin
+      object = object_type.from_json(string)
+    rescue ex : JSON::MappingError
+      message = parse_error(ex.message)
+      raise Exception.new(message)
     end
 
+    # return object
     return object
   end
 
-  # loop through our object variables and find what cannot be nil
-  private def self.get_required(obj : T) forall T
-    req = Array(String).new
-    {% for ivar in T.instance_vars %}
-      if {{!ivar.type.nilable?}}
-        req.push({{ivar.stringify}})
-      end
-    {% end %}
-
-    return req
-  end
-
-  # pass through object, col name, col value and attempt to set it
-  # if it cannot return false, this will be due to either a type miss match or
-  private def self.set(obj : T, attr, val) forall T
-    {% for ivar in T.instance_vars %}
-      if {{ivar.stringify}} == attr
-        # check that the var is correct type for field
-        if val.is_a?({{ivar.type}})
-          obj.{{ivar.id}} = val
-        else
-          raise Exception.new("Result set has wrong type for field '#{attr}'")
+  # build a json object for the field
+  private def self.json_encode_field(json, col, value)
+    case value
+    when Bytes
+      # custom json encoding. Avoid extra allocations.
+      json.field col do
+        json.array do
+          value.each do |e|
+            json.scalar e
+          end
         end
       end
-    {% end %}
+    when Time::Span
+      # Time Span isn't supported
+    else
+      # encode the value as their built in json format.
+      json.field col do
+        value.to_json(json)
+      end
+    end
+  end
+
+  private def self.parse_error(message)
+    begin
+      field = message.to_s.split(": ")[1]
+      return "Result set is missing required field: #{field}"
+    rescue
+      field = message.to_s.split("#")[1].split(" ")[0]
+      return "Invalid data type for field: #{field}"
+    end
   end
 end

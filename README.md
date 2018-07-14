@@ -40,6 +40,9 @@ class Note
   property content : String
   property likes : Int64
   property updated : Time
+
+  def initialize(@note_id, @content, @likes, @updated)
+  end  
 end
 
 db = DB.open "mysql://root:password@localhost:3306/test"
