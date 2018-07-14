@@ -5,8 +5,10 @@ Main features:
 	SQL result sets to be transformed into an object or array of object  
 	SQL scripts to be injected with the correct variables from the passed object  
 
+For the mapping to work (rs -> object) the column name in the result set must match the class' attribute name
+
 Uses the JSON library from stdlib to allow from_json to be used to prevent the need for messy custom initializers on each class.  
-Simply ```include Objectify``` in classes to be created from a SQL result set  
+Simply ```include Objectify::Mappable``` in classes that will be created from a SQL result set  
 
 ## Installation
 
@@ -23,13 +25,13 @@ dependencies:
 ```crystal
 require "objectify"
 
-# include objectify in your class
+# include objectify's mappable in your class
 class Foo
-  include Objectify
+  include Objectify::Mappable
 end
 ```
 
-##### Result set to object
+##### Result set to object (to_one)
 ```crystal
 require "db"
 require "mysql"
@@ -37,9 +39,9 @@ require "objectify"
 
 # Your class that is to be built from SQL, will raise exception if:
 # A non-nillable field is not in the result set 
-# Or a field being returned from mysql is the wrong type
+# Or a field in the result set does not match the attribute's type
 class Note
-  include Objectify
+  include Objectify::Mappable
   property note_id : String
   property content : String
   property likes : Int64
@@ -52,13 +54,13 @@ end
 db = DB.open "mysql://root:password@localhost:3306/test"
 
 db.query "SELECT '123' as note_id, 'hello' as content, 4 as likes, NOW() as updated FROM DUAL;" do |rs|
-    note = Objectify.to_object(rs, Note)
+    note = Objectify.to_one(rs, Note)
 
     puts note # => Note Object
 end
 ```
 
-##### Result set to array of object
+##### Result set to array of object (to_many)
 ```crystal
 require "db"
 require "mysql"
@@ -66,7 +68,7 @@ require "objectify"
 
 # Your class that is to be built from SQL
 class Note
-  include Objectify
+  include Objectify::Mappable
   property note_id : String
   property content : String
   property likes : Int64
@@ -78,7 +80,7 @@ db = DB.open "mysql://root:password@localhost:3306/test"
 db.query "SELECT '123' as note_id, 'hello' as content, 4 as likes FROM DUAL
           UNION ALL
           SELECT '444', 'asd', 66 FROM DUAL;" do |rs|
-    notes = Objectify.to_objects(rs, Note)
+    notes = Objectify.to_many(rs, Note)
 
     puts notes # => Array of Note
 end
@@ -108,7 +110,7 @@ db.exec query, args
 ```
 ## Error Handling
 Checks for required fields (non nillable) ```Result set is missing required field: foo```  
-Checks for correct data type: ```Invalid data type for field: foo```
+Checks for correct data type: ```Invalid data type for field: foo```  
 
 
 

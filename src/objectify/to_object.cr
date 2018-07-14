@@ -1,17 +1,18 @@
 require "json"
 
 module Objectify
-  # currently uses JSON::Serializable to create custom initialiser
-  macro included
-    include JSON::Serializable
+  module Mappable
+    # currently uses JSON::Serializable to create custom initialiser
+    macro included
+      include JSON::Serializable
+    end
   end
-
   # T.class so we can get type variable of the object and create an array
-  def self.to_object(rs, object_type)
+  def self.to_one(rs, object_type)
     self.build(rs, object_type)[0]
   end
 
-  def self.to_objects(rs, object_type)
+  def self.to_many(rs, object_type)
     self.build(rs, object_type)
   end
 
