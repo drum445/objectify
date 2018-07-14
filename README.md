@@ -9,6 +9,7 @@ For the mapping to work (rs -> object) the column name in the result set must ma
 
 Uses the JSON library from stdlib to allow from_json to be used to prevent the need for messy custom initializers on each class.  
 Simply ```include Objectify::Mappable``` in classes that will be created from a SQL result set  
+This include is not needed if your class is using JSON.mapping  
 
 ## Installation
 
