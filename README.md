@@ -1,8 +1,12 @@
 # objectify
 
-Crystal library to be used with the db lib.  
-Allows SQL result sets to be transformed into an object or array of object  
-Also allows SQL scripts to be injected with the correct variables from the passed object  
+Crystal micro-orm library, similar to what dapper supplies for .NET Core  
+Main features:  
+	SQL result sets to be transformed into an object or array of object  
+	SQL scripts to be injected with the correct variables from the passed object  
+
+Uses the JSON library from stdlib to allow from_json to be used to prevent the need for messy custom initializers on each class.  
+Simply ```include Objectify``` in classes to be created from a SQL result set  
 
 ## Installation
 
@@ -102,8 +106,11 @@ p = Person.new("1234", "test")
 query, args = Objectify.to_sql("INSERT INTO person (person_id, username) VALUES({id}, {username})", p)
 db.exec query, args
 ```
-## Todo
-Better error handling  
+## Error Handling
+Checks for required fields (non nillable) ```Result set is missing required field: foo```  
+Checks for correct data type: ```Invalid data type for field: foo```
+
+
 
 ## Contributors
 
