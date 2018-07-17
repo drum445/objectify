@@ -102,22 +102,22 @@ require "objectify"
 class Person
   include Objectify::Mappable
   
-  @[JSON::Field(key: "person_id", emit_null: true)]
-  property id : String
+  @[JSON::Field(key: "id", emit_null: true)]
+  property person_id : String
   property username : String
   property created : Time?
 
-  def initialize(@note_id, @content, @likes, @updated)
+  def initialize(@person_id : String, @username)
   end  
 end
 
 db = DB.open "mysql://root:password@localhost:3306/test"
 
-# person_id will map to Person.id due to JSON::Field settings
-db.query "SELECT '123' as person_id, 'drum445' as username FROM DUAL;" do |rs|
+# id will map to Person.person_id due to JSON::Field settings
+db.query "SELECT '123' as id, 'drum445' as username FROM DUAL;" do |rs|
     person = Objectify.to_one(rs, Person)
 
-    puts person # => Note Object
+    puts person # => Person Object
 end
 ```
 
