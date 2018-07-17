@@ -88,6 +88,39 @@ end
 
 ```
 
+##### Custom Properties
+As we are using the JSON::Serializable module we can take advantage of this:  
+https://crystal-lang.org/api/0.25.1/JSON/Serializable.html  
+Allowing us to have different column names in the result set map to our class attributes  
+
+```crystal
+
+require "db"
+require "mysql"
+require "objectify"
+
+class Person
+  include Objectify::Mappable
+  
+  @[JSON::Field(key: "person_id", emit_null: true)]
+  property id : String
+  property username : String
+  property created : Time?
+
+  def initialize(@note_id, @content, @likes, @updated)
+  end  
+end
+
+db = DB.open "mysql://root:password@localhost:3306/test"
+
+# person_id will map to Person.id due to JSON::Field settings
+db.query "SELECT '123' as person_id, 'drum445' as username FROM DUAL;" do |rs|
+    person = Objectify.to_one(rs, Person)
+
+    puts person # => Note Object
+end
+```
+
 #### Inserting object into DB
 ```crystal
 require "db"
@@ -113,6 +146,10 @@ db.exec query, args
 Checks for required fields (non nillable) ```Result set is missing required field: foo```  
 Checks for correct data type: ```Invalid data type for field: foo```  
 
+## Known Issues
+Wouldn't say it's an issue but when a class includes Objectify::Mappable, if said class also has an initialize method which requires 2 params it will cause a compilation issue.  
+This is due to the following: https://github.com/crystal-lang/crystal/issues/6405  
+To get round this simply use type restriction on the first param  
 
 
 ## Contributors
