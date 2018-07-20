@@ -2,8 +2,8 @@
 
 Crystal micro-orm library, similar to what dapper supplies for .NET Core  
 Main features:  
-	SQL result sets to be transformed into an object or array of object  
-	SQL scripts to be injected with the correct variables from the passed object  
+  SQL result sets to be transformed into an object or array of object  
+  SQL scripts to be injected with the correct variables from the passed object  
 
 For the mapping to work (rs -> object) the column name in the result set must match the class' attribute name
 
@@ -86,6 +86,19 @@ db.query "SELECT '123' as note_id, 'hello' as content, 4 as likes FROM DUAL
     puts notes # => Array of Note
 end
 
+```
+
+#### Alternative syntax
+I prefer using the explicit "to_one" or "to_many" methods however if you like you can use Object.from_rs(rs) instead
+This will work with arrays or single objects
+```crystal
+db.query "SELECT '123' as id, 'drum445' as username FROM DUAL;" do |rs|
+  person = Person.from_rs(rs)
+  people = Array(Person).from_rs(rs)
+
+  puts person # => Person Object
+  puts people # => Array of Person  
+end
 ```
 
 ##### Custom Properties

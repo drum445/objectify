@@ -1,5 +1,16 @@
 require "json"
 
+# allow Object.from_rs(rs), will work with arrays and single objects
+def Object.from_rs(rs) : self
+  if self.is_a?(Array.class)
+    new_array = self.new
+    object_type = typeof(new_array[0])
+    return Objectify.to_many(rs, object_type)
+  else
+    return Objectify.to_one(rs, self)
+  end
+end
+
 module Objectify
   module Mappable
     # currently uses JSON::Serializable to create custom initialiser
@@ -7,6 +18,7 @@ module Objectify
       include JSON::Serializable
     end
   end
+
   # T.class so we can get type variable of the object and create an array
   def self.to_one(rs, object_type)
     self.build(rs, object_type)[0]
@@ -26,7 +38,7 @@ module Objectify
     result
   end
 
-  # transform each row to object
+  # transform each row to l
   private def self.transform_one(rs, object_type)
     col_names = rs.column_names
 
