@@ -159,11 +159,6 @@ db.exec query, args
 Checks for required fields (non nillable) ```Result set is missing required field: foo```  
 Checks for correct data type: ```Invalid data type for field: foo```  
 
-## Known Issues
-Wouldn't say it's an issue but when a class includes Objectify::Mappable, if said class also has an initialize method which requires 2 params it will cause a compilation issue.  
-This is due to the following: https://github.com/crystal-lang/crystal/issues/6405  
-To get round this simply use type restriction on the first param  
-
 
 ## Contributors
 
