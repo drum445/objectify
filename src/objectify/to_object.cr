@@ -54,7 +54,7 @@ module Objectify
     # create an object using the JSON created above
     begin
       object = object_type.from_json(string)
-    rescue ex : JSON::MappingError
+    rescue ex
       message = parse_error(ex.message)
       raise Exception.new(message)
     end
